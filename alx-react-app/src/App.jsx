@@ -4,9 +4,12 @@ import MainContent from './components/MainContent'
 import Footer from './components/Footer'
 import UserProfile from './components/UserProfile'
 
+import WelcomeMessage from './components/WelcomeMessage.jsx';
+
 function App() {
   return (
     <>
+      <WelcomeMessage />
       <Header />
       <MainContent />
       <UserProfile 
