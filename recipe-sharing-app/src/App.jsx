@@ -4,22 +4,25 @@ import AddRecipeForm from './components/AddRecipeForm';
 import RecipeList from './components/RecipeList';
 import RecipeDetails from './components/RecipeDetails';
 import SearchBar from './components/SearchBar';
+import FavoritesList from './components/FavoritesList';
+import RecommendationsList from './components/RecommendationsList';
 
 function App() {
   return (
     <Router>
       <div>
         <h1>🍲 Recipe Sharing App</h1>
-
         <SearchBar />
 
-        <Routes>  {/* clearly showing route configuration */}
+        <Routes>
           <Route
             path="/"
             element={
               <>
                 <AddRecipeForm />
                 <RecipeList />
+                <FavoritesList />
+                <RecommendationsList />
               </>
             }
           />
