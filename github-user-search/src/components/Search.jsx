@@ -1,55 +1,59 @@
-// src/components/Search.jsx
-import React, { useState } from "react";
-import { fetchUserData } from "../services/githubService";
+import { useState } from "react";
+import api from "../services/api";
 import UserCard from "./UserCard";
 
-export default function Search() {
-  const [username, setUsername] = useState("");
-  const [user, setUser] = useState(null);
-  const [status, setStatus] = useState("idle"); // idle | loading | success | error
-  const [errorMsg, setErrorMsg] = useState("");
+function Search() {
+  const [query, setQuery] = useState("");
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = async (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
-    if (!username.trim()) return;
-    setStatus("loading");
-    setUser(null);
-    setErrorMsg("");
+    if (!query.trim()) return;
+
+    setLoading(true);
+    setError("");
+    setUsers([]);
+
     try {
-      const data = await fetchUserData(username.trim());
-      setUser(data);
-      setStatus("success");
+      const response = await api.get(`/search/users?q=${query}`);
+      setUsers(response.data.items); // ← use .map in render
     } catch (err) {
-      setStatus("error");
-      if (err.code === 404 || err.message === "Not Found") {
-        setErrorMsg("Looks like we can't find the user");
-      } else {
-        setErrorMsg("Error fetching user. Try again.");
-      }
+      setError("Looks like we can't find the users.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="p-4">
-      <h2 className="text-xl font-semibold mb-2">Search by username</h2>
-      <form onSubmit={handleSubmit} className="flex gap-2 mb-4">
+      <form onSubmit={handleSearch} className="flex gap-2 mb-4">
         <input
-          className="border p-2 flex-1"
           type="text"
-          placeholder="Enter GitHub username..."
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
+          placeholder="Search GitHub users..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          className="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
-        <button className="px-4 py-2 border" type="submit">
+        <button
+          type="submit"
+          className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+        >
           Search
         </button>
       </form>
 
-      {status === "loading" && <p>Loading...</p>}
+      {loading && <p className="text-center">Loading...</p>}
+      {error && <p className="text-center text-red-600">{error}</p>}
 
-      {status === "error" && <p className="text-red-600">{errorMsg}</p>}
-
-      {status === "success" && user && <UserCard user={user} />}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {users.map((user) => (
+          <UserCard key={user.id} user={user} />
+        ))}
+      </div>
     </div>
   );
 }
+
+export default Search;
