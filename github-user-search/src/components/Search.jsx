@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { searchUsers, getUserDetails } from "../services/api";
+import { fetchUserData, getUserDetails } from "../services/githubService";
 import UserCard from "./UserCard";
 
 function Search() {
@@ -18,7 +18,7 @@ function Search() {
 
     try {
       // 1️⃣ Search users
-      const searchResults = await searchUsers(query);
+      const searchResults = await fetchUserData(query);
 
       if (searchResults.length === 0) {
         setError("No users found.");
