@@ -3,22 +3,27 @@ import { fetchUserData, getUserDetails } from "../services/githubService";
 import UserCard from "./UserCard";
 
 function Search() {
-  const [query, setQuery] = useState("");
+  const [username, setUsername] = useState("");
+  const [location, setLocation] = useState("");
+  const [minRepos, setMinRepos] = useState("");
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!query.trim()) return;
+    if (!username.trim()) return;
 
     setLoading(true);
     setError("");
     setUsers([]);
 
     try {
-      // 1️⃣ Search users
-      const searchResults = await fetchUserData(query);
+      const searchResults = await fetchUserData(
+        username,
+        location,
+        Number(minRepos)
+      );
 
       if (searchResults.length === 0) {
         setError("No users found.");
@@ -26,7 +31,6 @@ function Search() {
         return;
       }
 
-      // 2️⃣ Fetch detailed info for each user
       const detailedUsers = await Promise.all(
         searchResults.map(async (user) => await getUserDetails(user.login))
       );
@@ -41,13 +45,27 @@ function Search() {
 
   return (
     <div className="p-4">
-      <form onSubmit={handleSearch} className="flex gap-2 mb-4">
+      <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-2 mb-4">
         <input
           type="text"
-          placeholder="Search GitHub users..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
           className="flex-1 border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="text"
+          placeholder="Location (optional)"
+          value={location}
+          onChange={(e) => setLocation(e.target.value)}
+          className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input
+          type="number"
+          placeholder="Min Repos (optional)"
+          value={minRepos}
+          onChange={(e) => setMinRepos(e.target.value)}
+          className="border rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
         <button
           type="submit"
@@ -69,4 +87,4 @@ function Search() {
   );
 }
 
-export default Search;
+export default Search
