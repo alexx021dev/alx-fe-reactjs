@@ -1,5 +1,5 @@
 import { useState } from "react";
-import api from "../services/api";
+import { searchUsers, getUserDetails } from "../services/api";
 import UserCard from "./UserCard";
 
 function Search() {
@@ -17,8 +17,21 @@ function Search() {
     setUsers([]);
 
     try {
-      const response = await api.get(`/search/users?q=${query}`);
-      setUsers(response.data.items); // ← use .map in render
+      // 1️⃣ Search users
+      const searchResults = await searchUsers(query);
+
+      if (searchResults.length === 0) {
+        setError("No users found.");
+        setLoading(false);
+        return;
+      }
+
+      // 2️⃣ Fetch detailed info for each user
+      const detailedUsers = await Promise.all(
+        searchResults.map(async (user) => await getUserDetails(user.login))
+      );
+
+      setUsers(detailedUsers);
     } catch (err) {
       setError("Looks like we can't find the users.");
     } finally {
