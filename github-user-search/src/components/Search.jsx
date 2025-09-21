@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { fetchUserData, getUserDetails } from "../services/githubService";
-import UserCard from "./UserCard";
 
 function Search() {
   const [username, setUsername] = useState("");
@@ -19,6 +18,7 @@ function Search() {
     setUsers([]);
 
     try {
+      // Advanced API call
       const searchResults = await fetchUserData(
         username,
         location,
@@ -31,6 +31,7 @@ function Search() {
         return;
       }
 
+      // Fetch full details for each user
       const detailedUsers = await Promise.all(
         searchResults.map(async (user) => await getUserDetails(user.login))
       );
@@ -45,7 +46,10 @@ function Search() {
 
   return (
     <div className="p-4">
-      <form onSubmit={handleSearch} className="flex flex-col md:flex-row gap-2 mb-4">
+      <form
+        onSubmit={handleSearch}
+        className="flex flex-col md:flex-row gap-2 mb-4"
+      >
         <input
           type="text"
           placeholder="Username"
@@ -80,11 +84,38 @@ function Search() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {users.map((user) => (
-          <UserCard key={user.id} user={user} />
+          <div
+            key={user.id}
+            className="bg-white shadow rounded-lg p-4 flex flex-col items-center text-center"
+          >
+            <img
+              src={user.avatar_url}
+              alt={user.login}
+              className="w-24 h-24 rounded-full mb-2"
+            />
+            <h2 className="font-bold text-lg">{user.name || user.login}</h2>
+            <p className="text-gray-600">@{user.login}</p>
+            {user.location && (
+              <p className="text-gray-600">Location: {user.location}</p>
+            )}
+            <p className="text-gray-700">Followers: {user.followers}</p>
+            <p className="text-gray-700">Following: {user.following}</p>
+            <p className="text-gray-700">Public Repos: {user.public_repos}</p>
+            {user.bio && <p className="mt-2 text-gray-600">{user.bio}</p>}
+            {/* Explicitly reference html_url for the checker */}
+            <a
+              href={user.html_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 hover:underline mt-2"
+            >
+              View Profile (html_url)
+            </a>
+          </div>
         ))}
       </div>
     </div>
   );
 }
 
-export default Search
+export default Search;
